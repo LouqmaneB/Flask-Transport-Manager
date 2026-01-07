@@ -30,9 +30,9 @@ try:
   db = client[MONGO_DB_NAME]
   routes_collection = db["routes"]
   stops_collection = db["stops"]
-  print("✅ MongoDB connected successfully!")
+  print("MongoDB connected successfully!")
 except Exception as e:
-  print(f"❌ MongoDB connection failed: {e}")
+  print(f"MongoDB connection failed: {e}")
   raise e
 
 @app.route("/")
@@ -159,7 +159,7 @@ def add_stop():
 
 @app.route("/get_stops", methods=["GET"])
 def get_stops():
-  stops = list(stops_collection.find())
+  stops = list(stops_collection.find().limit(500))
   for stop in stops:
     stop["_id"] = str(stop["_id"])
   return jsonify(stops), 200
