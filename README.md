@@ -44,7 +44,7 @@ Sie ermöglicht die Verwaltung von Transportdaten und deren Darstellung in einer
 
 ## 5. Systemarchitektur
 <p align="center">
-  <img src="static\images\Screenshot 2026-01-07 012355.png" alt="Systemarchitektur">
+  <img src="static\images\Systemarchitektur.png" alt="Systemarchitektur">
 </p>
 ## 6. Installation und Inbetriebnahme
 
