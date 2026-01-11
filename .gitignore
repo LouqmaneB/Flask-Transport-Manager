@@ -1,0 +1,22 @@
+# Python-Cache
+__pycache__/
+*.pyc
+
+# Virtuelle Umgebung
+env/
+
+# Umgebungsvariablen
+.env
+
+# IDE-Dateien
+.vscode/
+
+# OS-Dateien
+.DS_Store
+Thumbs.db
+
+# Flask
+instance/
+
+# Andere
+static/js/main.js

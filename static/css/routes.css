@@ -1,0 +1,74 @@
+html,
+body,
+#map {
+  height: 100%;
+  margin: 0;
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+}
+
+#controls {
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  z-index: 1000;
+  background: #ffffffdd;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  border-radius: 12px;
+  padding: 15px;
+  min-width: 250px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+#controls input,
+#controls select,
+#controls button {
+  padding: 8px 10px;
+  font-size: 14px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  outline: none;
+}
+
+#controls button {
+  background-color: #007bff;
+  color: white;
+  border: none;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+#controls button:hover {
+  background-color: #0056b3;
+}
+
+#controls button.delete {
+  background-color: red;
+}
+
+.context-menu {
+  position: absolute;
+  display: none;
+  background: white;
+  border: 1px solid #ccc;
+  z-index: 10000;
+  padding: 5px;
+  border-radius: 8px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+}
+
+.context-menu div {
+  padding: 4px 10px;
+  cursor: pointer;
+}
+
+.context-menu div:hover {
+  background: #f0f0f0;
+}
+
+.leaflet-control-zoom,
+.leaflet-popup,
+.leaflet-popup-tip-container {
+  display: none;
+}

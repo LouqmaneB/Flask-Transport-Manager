@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Stops Editor</title>
+    <!-- styles -->
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/leaflet@1.9.3/dist/leaflet.css"
+    />
+    <link rel="stylesheet" href="../static/css/stop.css" />
+    <!-- leaflet -->
+    <script src="https://unpkg.com/leaflet@1.9.3/dist/leaflet.js"></script>
+  </head>
+
+  <body>
+    <div id="controls">
+      <input type="text" id="stopName" placeholder="Stop name" />
+      <button onclick="addStop()">Add Stop</button>
+      <select id="stopsDropdown" onchange="focusOnStop(this.value)">
+        <option value="">Select a stop</option>
+      </select>
+      <button onclick="fetchStops()">Refresh</button>
+      <button onclick="clearMap()">Clear</button>
+      <button onclick="deleteSelectedStop()" class="danger">Delete</button>
+    </div>
+
+    <div id="map"></div>
+    <div class="context-menu" id="contextMenu"></div>
+
+    <script src="../static/js/stop/stop.js"></script>
+  </body>
+</html>

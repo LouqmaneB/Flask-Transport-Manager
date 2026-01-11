@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Map Routes Editor</title>
+
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/leaflet@1.9.3/dist/leaflet.css"
+    />
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/leaflet-routing-machine@3.2.12/dist/leaflet-routing-machine.css"
+    />
+
+    <link rel="stylesheet" href="../static/css/routes.css" />
+
+    <script src="https://unpkg.com/leaflet@1.9.3/dist/leaflet.js"></script>
+    <script src="https://unpkg.com/leaflet-routing-machine@3.2.12/dist/leaflet-routing-machine.min.js"></script>
+  </head>
+  <body>
+    <div id="controls">
+      <input type="text" id="routeName" placeholder="Route name" />
+      <button onclick="saveRoute()">Save</button>
+      <select id="routesDropdown" onchange="loadRoute(this.value)">
+        <option value="">Select a route</option>
+      </select>
+      <button onclick="fetchRoutes()">Refresh</button>
+      <button onclick="clearMap()">Clear</button>
+      <button class="delete" onclick="deleteSelectedRoute()">
+        Delete Route
+      </button>
+    </div>
+
+    <div id="map"></div>
+    <div class="context-menu" id="contextMenu"></div>
+
+    <script src="../static/js/route/route.js"></script>
+  </body>
+</html>
