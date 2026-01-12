@@ -89,7 +89,7 @@ async function addStop() {
   });
   const data = await res.json();
 
-  createMarker(lat, lng, name, data._id);
+  createMarker(lat, lng, name, data.id);
 
   // Eingaben und temporäre Markierung löschen
   document.getElementById("stopName").value = "";
@@ -104,23 +104,28 @@ async function addStop() {
 
 async function fetchStops() {
   const res = await fetch("/get_stops");
-  const data = await res.json();
-  stops = data;
+  const response = await res.json();
+  // if(!response.success){
+  //   alert('cannot fetch stops')
+  //   return;
+  // }
+  stops = response.data.stops;
+  console.log(stops)
   const dropdown = document.getElementById("stopsDropdown");
   dropdown.innerHTML = '<option value="">Select a stop</option>';
-  data.forEach((stop) => {
+  stops.forEach((stop) => {
     const option = document.createElement("option");
     option.value = stop._id;
     option.textContent = stop.stop_name;
     dropdown.appendChild(option);
   });
   clearMap();
-  data.forEach((stop) =>
+  stops.forEach((stop) =>
     createMarker(
       stop.location.coordinates[0],
       stop.location.coordinates[1],
       stop.stop_name,
-      stop._id
+      stop.id
     )
   );
 }

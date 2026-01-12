@@ -15,10 +15,10 @@ async function fetchStops() {
   const res = await fetch("/get_stops");
   const stops = await res.json();
 
-  stops.forEach((stop) => {
+  stops.data.stops.forEach((stop) => {
     const lat = stop.location.coordinates[0];
     const lng = stop.location.coordinates[1];
-    stopIdToCoordinates[stop._id] = { lat, lng };
+    stopIdToCoordinates[stop.id] = { lat, lng };
 
     const marker = L.marker([lat, lng], {
       title: stop.name,
@@ -32,14 +32,17 @@ async function fetchStops() {
       .addTo(map)
       .bindPopup(stop.name);
 
+      console.log(stopIdToCoordinates);
+      
     marker.on("click", () => {
       const order = points.length + 1;
-      points.push({ stop_id: stop._id, order });
+      points.push({ stopId: stop.id, order });
       const routeMarker = createMarker(lat, lng);
-      routeMarker.stop_id = stop._id;
+      routeMarker.stopId = stop.id;
       markers.push(routeMarker);
       updateRoute();
       if (selectedRouteId) updateRouteInDB();
+      console.log(points);
     });
 
     stopsMarkers.push(marker);
@@ -69,7 +72,7 @@ function deleteMarker() {
   if (!selectedMarker) return;
   map.removeLayer(selectedMarker);
   markers = markers.filter((m) => m !== selectedMarker);
-  points = points.filter((p) => p.stop_id !== selectedMarker.stop_id);
+  points = points.filter((p) => p.stopId !== selectedMarker.stopId);
   selectedMarker = null;
   contextMenu.style.display = "none";
   updateRoute();
@@ -81,10 +84,11 @@ function updateRoute() {
     map.removeControl(routingControl);
   }
 
+  console.log(points);
   if (points.length < 2) return;
 
   const waypoints = points
-    .map((p) => stopIdToCoordinates[p.stop_id])
+    .map((p) => stopIdToCoordinates[p.stopId])
     .filter(Boolean)
     .map((coord) => L.latLng(coord.lat, coord.lng));
 
@@ -119,10 +123,10 @@ async function fetchRoutes() {
   const dropdown = document.getElementById("routesDropdown");
 
   dropdown.innerHTML = `<option value="">Select a route</option>`;
-  routes.forEach((route) => {
+  routes.data.forEach((route) => {
     const option = document.createElement("option");
     option.value = route._id;
-    option.textContent = route.route_name;
+    option.textContent = route.routeName;
     dropdown.appendChild(option);
   });
 
@@ -139,16 +143,18 @@ async function loadRoute(id) {
 
   clearMap();
   selectedRouteId = id;
-
-  route.points
+  route.data.stops
     .sort((a, b) => a.order - b.order)
     .forEach((p) => {
-      const coord = stopIdToCoordinates[p.stop_id];
+      const coord = stopIdToCoordinates[p.stopId];
+      console.log(stopIdToCoordinates);
+      console.log(p);
+      
       if (!coord) return;
       const marker = createMarker(coord.lat, coord.lng);
-      marker.stop_id = p.stop_id;
+      marker.stopId = p.stopId;
       markers.push(marker);
-      points.push({ stop_id: p.stop_id, order: p.order });
+      points.push({ stopId: p.stopId, order: p.order });
     });
 
   updateRoute();
@@ -168,7 +174,7 @@ async function updateRouteInDB() {
   await fetch(`/update_route/${selectedRouteId}`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ points }),
+    body: JSON.stringify({ stops: points }),
   });
 }
 
