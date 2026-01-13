@@ -1,13 +1,10 @@
-
----
-
-# Transport Management System
+# Transport Management System (v2.0.1)
 
 ## Inhaltsverzeichnis
 
 1. [Projektbeschreibung](#1-projektbeschreibung)
 2. [Ziel des Projekts](#2-ziel-des-projekts)
-3. [Anwendungsbereich](#3-anwendungsbereich)
+3. [Projektabgrenzung](#3-projektabgrenzung)
 4. [Technische Grundlagen](#4-technische-grundlagen)
 5. [Systemarchitektur](#5-systemarchitektur)
 6. [Installation und Inbetriebnahme](#6-installation-und-inbetriebnahme)
@@ -15,124 +12,194 @@
 8. [Projektstruktur](#8-projektstruktur)
 9. [Funktionaler Umfang](#9-funktionaler-umfang)
 10. [Bekannte Einschränkungen](#10-bekannte-einschränkungen)
+11. [Hinweis zur Projektentwicklung](#11-hinweis-zur-projektentwicklung)
+
+---
 
 ## 1. Projektbeschreibung
 
-Dieses Projekt ist eine webbasierte Transport-Management-Anwendung auf Basis von Flask.  
-Sie ermöglicht die Verwaltung von Transportdaten und deren Darstellung in einer interaktiven Kartenansicht.
+Dieses Projekt ist eine webbasierte Transport-Management-Anwendung auf Basis von **Flask**,  
+die als **Client für eine externe REST-API** fungiert.
+
+Die Anwendung greift **nicht direkt auf eine Datenbank zu**, sondern bezieht alle relevanten
+Transportdaten (z. B. Routen und Haltestellen) über definierte HTTP-Endpunkte
+eines separaten **Express.js Backend-Services**.
+
+Der Fokus liegt auf der Darstellung und Verwaltung der Transportdaten
+in einer interaktiven Kartenansicht.
+
+⚠️ Hinweis: Diese Anwendung benötigt ein laufendes Express.js Backend (siehe [Bus-Management-System](https://github.com/LouqmaneB/Bus-Management-System)).
+
+---
 
 ## 2. Ziel des Projekts
 
-- Ziel dieses Projekts ist die Erstellung eines modularen Grundsystems, das als Ausgangspunkt für ein umfassendes [Bus-Management-System](#) ( Noch in Entwicklung ) fungiert.
-- Der Fokus liegt auf der Implementierung zentraler Basisfunktionen, die in späteren Entwicklungsphasen erweitert werden können.
+- Entwicklung eines modularen Grundsystems für ein umfassendes [**Bus-Management-System**](https://github.com/LouqmaneB/Bus-Management-System)
+- Klare Trennung zwischen:
+  - Präsentationslogik (Flask)
+  - Geschäftslogik und Datenhaltung (Express API)
+- Vorbereitung für die spätere Integration eines **Admin-Dashboards** sowie weiterer Clients
+
+---
 
 ## 3. Projektabgrenzung
 
-- Dieses Projekt bildet ein Grundsystem und ist bewusst auf zentrale Funktionen beschränkt.
-- Erweiterte Funktionen wie Benutzerverwaltung oder Echtzeit-Tracking sind nicht Bestandteil der aktuellen Version.
+- Dieses Repository stellt **keine eigenständige Backend-API** dar
+- Direkter Datenbankzugriff ist **nicht Bestandteil** der aktuellen Version
+- Funktionen wie Authentifizierung, Rollenmanagement oder Validierung
+  werden durch die externe API bereitgestellt
+
+---
 
 ## 4. Technische Grundlagen
 
-<p align="center"> <img src="https://raw.githubusercontent.com/devicons/devicon/master/icons/python/python-original.svg" alt="Python" width="45" height="45"/> <img src="https://raw.githubusercontent.com/devicons/devicon/master/icons/flask/flask-original.svg" alt="Flask" width="45" height="45"/> <img src="https://raw.githubusercontent.com/devicons/devicon/master/icons/mongodb/mongodb-original.svg" alt="MongoDB" width="45" height="45"/> <img src="https://raw.githubusercontent.com/devicons/devicon/master/icons/html5/html5-original.svg" alt="HTML5" width="45" height="45"/> <img src="https://raw.githubusercontent.com/devicons/devicon/master/icons/css3/css3-original.svg" alt="CSS3" width="45" height="45"/> <img src="https://raw.githubusercontent.com/devicons/devicon/master/icons/javascript/javascript-original.svg" alt="JavaScript" width="45" height="45"/> <img src="https://cdn.freebiesupply.com/logos/thumbs/2x/leaflet-1-logo.png" alt="Leaflet" width="90"/> </p>
+<p align="center">
+  <img src="https://raw.githubusercontent.com/devicons/devicon/master/icons/python/python-original.svg" alt="Python" width="45"/>
+  <img src="https://raw.githubusercontent.com/devicons/devicon/master/icons/flask/flask-original.svg" alt="Flask" width="45"/>
+  <img src="https://raw.githubusercontent.com/devicons/devicon/master/icons/html5/html5-original.svg" alt="HTML5" width="45"/>
+  <img src="https://raw.githubusercontent.com/devicons/devicon/master/icons/css3/css3-original.svg" alt="CSS3" width="45"/>
+  <img src="https://raw.githubusercontent.com/devicons/devicon/master/icons/javascript/javascript-original.svg" alt="JavaScript" width="45"/>
+  <img src="https://cdn.freebiesupply.com/logos/thumbs/2x/leaflet-1-logo.png" alt="Leaflet" width="90"/>
+</p>
 
 - Python
-- Flask (ein Web-Framework für Python)
-- MongoDB
+- Flask
 - HTML5 & CSS3
-- JavaScript (Clientseitige Logik)
+- JavaScript (clientseitige Logik)
 - Leaflet.js (Karten- und Routenvisualisierung)
+- REST-API-Kommunikation (HTTP / JSON)
+
+---
 
 ## 5. Systemarchitektur
+
 <p align="center">
-  <img src="static\images\Systemarchitektur.png" alt="Systemarchitektur">
+  <img src="static/images/Systemarchitektur_v2.0.1.png" alt="Systemarchitektur">
 </p>
+
+**Architekturüberblick:**
+
+- Flask-Anwendung
+
+  - Darstellung der Transportdaten
+  - Interaktive Kartenvisualisierung
+  - Kommunikation ausschließlich über HTTP
+
+- Express.js API (separates Repository)
+  - Zentrale Geschäftslogik
+  - Authentifizierung & Autorisierung
+  - Datenbankzugriff (MongoDB)
+
+Diese Architektur ermöglicht eine klare **Separation of Concerns**
+und erleichtert die Anbindung weiterer Frontends.
+
+---
+
 ## 6. Installation und Inbetriebnahme
 
-Zur lokalen Inbetriebnahme der Anwendung sind folgende Schritte erforderlich:
+### Voraussetzungen
 
-1. Klonen des Repositories:
+- ⚠️ [Express.js Backend-API](https://github.com/LouqmaneB/Bus-Management-System/tree/main/backend)
+- ⚠️ Konfigurierte API-Basis-URL (per Umgebungsvariable)
 
-   ```bash
-   git clone https://github.com/LouqmaneB/Flask-Transport-Manager.git
-   ```
+### Schritte
 
-2. Wechsel in das Projektverzeichnis:
+1. Repository klonen:
 
-   ```bash
-   cd Flask-Transport-Manager
-   ```
+```bash
+git clone https://github.com/LouqmaneB/Flask-Transport-Manager.git
+```
 
-3. Erstellen und Aktivieren einer virtuellen Python-Umgebung:
+2. Projektverzeichnis wechseln:
 
-   ```bash
-   python -m venv venv
-   source venv/bin/activate   # Linux / macOS
-   venv\Scripts\activate      # Windows
-   ```
+```bash
+cd Flask-Transport-Manager
+```
 
-4. Installation der benötigten Abhängigkeiten:
+3. Virtuelle Python-Umgebung erstellen und aktivieren:
 
-   ```bash
-   pip install -r requirements.txt
-   ```
+```bash
+python -m venv venv
+source venv/bin/activate # Linux / macOS
+venv\Scripts\activate # Windows
+```
 
-5. Starten der MongoDB-Datenbank.
+4.  Abhängigkeiten installieren:
 
-6. Start der Anwendung:
+```bash
+pip install -r requirements.txt
+```
 
-   ```bash
-   flask run
-   ```
+5. Anwendung starten:
 
-7. Zugriff auf die Anwendung über:
-   `http://127.0.0.1:5000`
+```bash
+flask run
+```
+
+6. Zugriff über:
+
+```bash
+http://127.0.0.1:5000
+```
 
 ## 7. Verwendung der Anwendung
 
-Nach dem Start der Anwendung erhält der Benutzer Zugriff auf die Hauptoberfläche.  
-Die Anwendung bietet zwei Hauptseiten (Routen):  
-- `/` – Anzeige und Verwaltung der Transportlinien und Routen auf der interaktiven Karte  
-- `/stops` – Verwaltung von Haltestellen: hinzufügen, bearbeiten oder entfernen
+Nach dem Start stellt die Anwendung eine Benutzeroberfläche zur Verfügung,
+über die Transportdaten angezeigt und verwaltet werden können.
 
+Verfügbare Hauptseiten:
+
+- `/`
+
+      Darstellung von Transportlinien und Routen auf einer interaktiven Karte
+
+- `/stops`
+
+      Anzeige und Verwaltung von Haltestellen (Datenbezug über API)
 
 ## 8. Projektstruktur
 
-Die grundlegende Projektstruktur ist wie folgt aufgebaut:
-
-```
-transport-management-system/
-│
-├── app.py                 # Einstiegspunkt der Anwendung
-├── requirements.txt       # Projektabhängigkeiten
-│
-├── templates/             # HTML-Templates
-│   ├── index.html
-│   └── routes.html
-│
-├── static/
-│   ├── css/               # Stylesheets
-│   ├── js/                # JavaScript-Dateien
-│   └── images/            # Statische Ressourcen
-│
-├── models/                # Datenbankmodelle
-├── routes/                # Flask-Routen und Controller
-└── README.md              # Projektdokumentation
+```text
+   transport-management-system/
+   │
+   ├── app.py           # Einstiegspunkt der Flask-Anwendung
+   ├── requirements.txt # Projektabhängigkeiten
+   │
+   ├── templates/       # HTML-Templates
+   │ ├── index.html
+   │ └── stops.html
+   │
+   ├── static/
+   │ ├── css/           # Stylesheets
+   │ ├── js/            # JavaScript-Dateien
+   │ └── images/        # Statische Ressourcen
+   └── README.md        # Projektdokumentation
 ```
 
 ## 9. Funktionaler Umfang
 
-Die Anwendung bietet unter anderem folgende Funktionen, die eine intuitive Verwaltung von Transportdaten ermöglichen:
+- Kartenbasierte Darstellung von Routen und Haltestellen
 
-- **Kartenbasierte Darstellung** der Transportwege, um Routen und Haltestellen auf einen Blick zu erfassen
-- **Erstellung, Bearbeitung und Löschung von Routen**, direkt über die interaktive Karte
-- **Interaktive Marker** mit Drag-and-Drop-Funktion zur einfachen Anpassung von Haltepunkten
-- **Persistente Speicherung** aller Daten in MongoDB, sodass Änderungen jederzeit erhalten bleiben
-- **Responsives Layout**, das die Anwendung auf verschiedenen Geräten nutzbar macht
+- Interaktive Marker zur Visualisierung von Stopps
+
+- Dynamischer Datenbezug über eine externe REST-API
+
+- Responsives Layout für unterschiedliche Endgeräte
 
 ## 10. Bekannte Einschränkungen
 
-Der aktuelle Stand der Anwendung weist noch folgende Einschränkungen auf:
+- Keine eigene Benutzer-Authentifizierung
 
-- **Benutzer-Authentifizierung**: nicht implementiert
-- **Echtzeit-Tracking**: nicht verfügbar
+- Keine direkte Datenpersistenz
 
+- Abhängigkeit von einer externen Backend-API
+
+## 11. Hinweis zur Projektentwicklung
+
+In einer früheren Version (v1.0.0) erfolgte der Datenbankzugriff
+direkt aus der Flask-Anwendung.
+
+Mit Version v2.0.1 wurde der Zugriff vollständig in eine
+separate Express.js API ausgelagert.
+Dieses Repository stellt somit ausschließlich die
+Frontend-nahe Präsentationsschicht dar.
