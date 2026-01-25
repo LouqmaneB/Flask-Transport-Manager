@@ -12,16 +12,19 @@ const stopIdToCoordinates = {};
 const stopsMarkers = [];
 
 async function fetchStops() {
-  const res = await fetch("/get_stops");
-  const stops = await res.json();
+  const res = await fetch("/admin_api/get_stops");
+  const response = await res.json();
 
-  stops.data.stops.forEach((stop) => {
+  const stops = response.data.stopsWithRoutes;
+
+  stops.forEach((item) => {
+    const stop = item.stop;
     const lat = stop.location.coordinates[0];
     const lng = stop.location.coordinates[1];
     stopIdToCoordinates[stop.id] = { lat, lng };
 
     const marker = L.marker([lat, lng], {
-      title: stop.name,
+      title: stop.stop_name,
       icon: L.icon({
         iconUrl: "https://cdn-icons-png.flaticon.com/512/684/684908.png",
         iconSize: [25, 25],
@@ -30,10 +33,7 @@ async function fetchStops() {
       }),
     })
       .addTo(map)
-      .bindPopup(stop.name);
-
-      console.log(stopIdToCoordinates);
-      
+      .bindPopup(stop.stop_name);
     marker.on("click", () => {
       const order = points.length + 1;
       points.push({ stopId: stop.id, order });
@@ -106,7 +106,7 @@ async function saveRoute() {
   const name = document.getElementById("routeName").value.trim();
   if (!name || !points.length) return alert("Provide name and points");
 
-  await fetch("/save_route", {
+  await fetch("/admin_api/save_route", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ name, points }),
@@ -118,7 +118,7 @@ async function saveRoute() {
 }
 
 async function fetchRoutes() {
-  const res = await fetch("/get_routes");
+  const res = await fetch("/admin_api/get_routes");
   const routes = await res.json();
   const dropdown = document.getElementById("routesDropdown");
 
@@ -137,24 +137,25 @@ async function fetchRoutes() {
 
 async function loadRoute(id) {
   if (!id) return;
-  const res = await fetch(`/get_route/${id}`);
+  const res = await fetch(`/admin_api/get_route/${id}`);
   const route = await res.json();
-  if (!route) return;
+  if (!route || !route.data) return;
 
   clearMap();
   selectedRouteId = id;
+
   route.data.stops
     .sort((a, b) => a.order - b.order)
     .forEach((p) => {
-      const coord = stopIdToCoordinates[p.stopId];
-      console.log(stopIdToCoordinates);
-      console.log(p);
-      
+      const stop = p.stopId; // stopId is actually the stop object
+      const coord = stopIdToCoordinates[stop.id]; // use stop.id here
       if (!coord) return;
+
       const marker = createMarker(coord.lat, coord.lng);
-      marker.stopId = p.stopId;
+      marker.stopId = stop.id;
       markers.push(marker);
-      points.push({ stopId: p.stopId, order: p.order });
+
+      points.push({ stopId: stop.id, order: p.order });
     });
 
   updateRoute();
@@ -164,14 +165,14 @@ async function deleteSelectedRoute() {
   const id = document.getElementById("routesDropdown").value;
   if (!id || !confirm("Delete selected route?")) return;
 
-  await fetch(`/delete_route/${id}`, { method: "DELETE" });
+  await fetch(`/admin_api/delete_route/${id}`, { method: "DELETE" });
   clearMap();
   fetchRoutes();
 }
 
 async function updateRouteInDB() {
   if (!selectedRouteId) return;
-  await fetch(`/update_route/${selectedRouteId}`, {
+  await fetch(`/admin_api/update_route/${selectedRouteId}`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ stops: points }),

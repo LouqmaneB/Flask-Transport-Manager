@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
@@ -8,7 +8,10 @@
       rel="stylesheet"
       href="https://unpkg.com/leaflet@1.9.3/dist/leaflet.css"
     />
-    <link rel="stylesheet" href="../static/css/stop.css" />
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='css/stop.css') }}"
+    />
     <!-- leaflet -->
     <script src="https://unpkg.com/leaflet@1.9.3/dist/leaflet.js"></script>
   </head>
@@ -28,6 +31,6 @@
     <div id="map"></div>
     <div class="context-menu" id="contextMenu"></div>
 
-    <script src="../static/js/stop/stop.js"></script>
+    <script src="{{ url_for('static', filename='js/stop/stop.js') }}"></script>
   </body>
 </html>

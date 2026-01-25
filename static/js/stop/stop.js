@@ -11,8 +11,8 @@ let tempMarker = null;
 
 function createMarker(lat, lng, name, id = null) {
   const customIcon = L.icon({
-    iconUrl: "static/images/station1.png",
-    iconRetinaUrl: "static/images/station1.png",
+    iconUrl: "/static/images/station1.png",
+    iconRetinaUrl: "/static/images/station1.png",
     iconSize: [30, 45],
     iconAnchor: [15, 45],
     popupAnchor: [0, -40],
@@ -34,7 +34,7 @@ function createMarker(lat, lng, name, id = null) {
   marker.on("dragend", async () => {
     const { lat, lng } = marker.getLatLng();
     if (marker.stopId) {
-      await fetch(`/update_stop/${marker.stopId}`, {
+      await fetch(`/admin_api/update_stop/${marker.stopId}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -82,7 +82,7 @@ async function addStop() {
   const lat = chosenLocation.lat;
   const lng = chosenLocation.lng;
 
-  const res = await fetch("/add_stop", {
+  const res = await fetch("/admin_api/add_stop", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ name, location: [lat, lng] }),
@@ -103,31 +103,35 @@ async function addStop() {
 }
 
 async function fetchStops() {
-  const res = await fetch("/get_stops");
+  const res = await fetch("/admin_api/get_stops");
   const response = await res.json();
-  // if(!response.success){
-  //   alert('cannot fetch stops')
-  //   return;
-  // }
-  stops = response.data.stops;
-  console.log(stops)
+
+  if (!response.success) {
+    alert("Cannot fetch stops");
+    return;
+  }
+
+  const stopsWithRoutes = response.data.stopsWithRoutes;
   const dropdown = document.getElementById("stopsDropdown");
   dropdown.innerHTML = '<option value="">Select a stop</option>';
-  stops.forEach((stop) => {
+
+  clearMap();
+
+  stopsWithRoutes.forEach(({ stop }) => {
+    // Populate dropdown
     const option = document.createElement("option");
-    option.value = stop._id;
+    option.value = stop.id;
     option.textContent = stop.stop_name;
     dropdown.appendChild(option);
-  });
-  clearMap();
-  stops.forEach((stop) =>
+
+    // Create markers
     createMarker(
       stop.location.coordinates[0],
       stop.location.coordinates[1],
       stop.stop_name,
       stop.id
-    )
-  );
+    );
+  });
 }
 
 function focusOnStop(id) {
@@ -141,7 +145,7 @@ function deleteMarker() {
   if (!selectedMarker) return;
   const id = selectedMarker.stopId;
   if (id && confirm("Delete this stop?")) {
-    fetch(`/delete_stop/${id}`, { method: "DELETE" }).then(() => {
+    fetch(`/admin_api/delete_stop/${id}`, { method: "DELETE" }).then(() => {
       map.removeLayer(selectedMarker);
       fetchStops();
       contextMenu.style.display = "none";
@@ -159,7 +163,7 @@ function clearMap() {
 function deleteSelectedStop() {
   const id = document.getElementById("stopsDropdown").value;
   if (!id || !confirm("Delete selected stop?")) return;
-  fetch(`/delete_stop/${id}`, { method: "DELETE" }).then(() => {
+  fetch(`/admin_api/delete_stop/${id}`, { method: "DELETE" }).then(() => {
     fetchStops();
   });
 }

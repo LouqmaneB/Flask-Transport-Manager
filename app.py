@@ -1,24 +1,34 @@
 import os
 from dotenv import load_dotenv
-from flask import Flask, render_template, request, jsonify
+from flask import Flask, render_template, request, jsonify, Blueprint, abort
 import requests
 
 load_dotenv()
 
 app = Flask(__name__)
-auth_token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY5NjNjODJiZDZhYWVlYmY4OWIwOTI5NiIsInJvbGUiOiJhZG1pbiIsImVtYWlsIjoibGwxMzMwMTM3QGdhbWlsLmNvbSIsImlhdCI6MTc2ODIxNjg0MSwiZXhwIjoxNzY4ODIxNjQxfQ.W4e24GTYsIla9OZLZy8dm6K5z5PTD0lIOWe7CQYecek'
-header = {
-  'Authorization': f'Bearer {auth_token}'
-}
+
+
+from flask import request, abort
+
+def get_admin_token():
+  token = request.headers.get("X-Admin-Token")
+
+  if not token:
+    token = request.cookies.get("admin_token")
+
+  if not token:
+    abort(401, description="Admin token missing")
+
+  return {"Authorization": f"Bearer {token}"}
 
 app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', 'dev-key-default')
+admin_bp = Blueprint("admin", __name__, url_prefix="/admin_api")
 
-
-@app.route("/")
+@admin_bp.route("/itineraire")
 def index():
   return render_template("index.html")
 
-@app.route("/save_route", methods=["POST"])
+@admin_bp.route("/save_route", methods=["POST"])
 def save_route():
   data = request.json
   route_name = data.get("name")
@@ -29,7 +39,7 @@ def save_route():
       response = requests.post(
         f"{os.getenv('EXPRESS_URI')}/api/routes", 
         json={"routeName":route_name, "stops": points},
-        headers=header
+        headers=get_admin_token()
       )
       response.raise_for_status()
       res = response.json()
@@ -39,7 +49,7 @@ def save_route():
     return jsonify(res), 201
   return jsonify({"status": "error", "message": "route name and (lat, lng) are required"}), 400
 
-@app.route('/get_routes')
+@admin_bp.route('/get_routes')
 def get_routes():
   try:
     response = requests.get(f"{os.getenv('EXPRESS_URI')}/api/routes")
@@ -49,7 +59,7 @@ def get_routes():
     return jsonify({"status": "error", "message": str(e)}), 500
   return jsonify(routes), 200
 
-@app.route("/get_route/<route_id>")
+@admin_bp.route("/get_route/<route_id>")
 def get_route(route_id):
   try:
     response = requests.get(f"{os.getenv('EXPRESS_URI')}/api/routes/{route_id}")
@@ -59,7 +69,7 @@ def get_route(route_id):
     return jsonify({"status": "error", "message": str(e)}), 500
   return jsonify(route), 200
 
-@app.route("/update_route/<route_id>", methods=["POST"])
+@admin_bp.route("/update_route/<route_id>", methods=["POST"])
 def update_route(route_id):
   data = request.json
   payload = data.get("stops")
@@ -68,7 +78,7 @@ def update_route(route_id):
   }
   if payload:
     try:
-      response = requests.put(f"{os.getenv('EXPRESS_URI')}/api/routes/{route_id}",json=payload,headers=header)
+      response = requests.put(f"{os.getenv('EXPRESS_URI')}/api/routes/{route_id}",json=payload,headers=get_admin_token())
       response.raise_for_status()
       route = response.json()
     except requests.exceptions.RequestException as e:
@@ -76,21 +86,21 @@ def update_route(route_id):
     return jsonify(route), 200
   return jsonify({"status": "error", "data": payload}), 400
 
-@app.route("/delete_route/<route_id>", methods=["DELETE"])
+@admin_bp.route("/delete_route/<route_id>", methods=["DELETE"])
 def delete_route(route_id):
   try:
-    response = requests.delete(f"{os.getenv('EXPRESS_URI')}/api/routes/{route_id}",headers=header)
+    response = requests.delete(f"{os.getenv('EXPRESS_URI')}/api/routes/{route_id}",headers=get_admin_token())
     response.raise_for_status()
   except requests.exceptions.RequestException as e:
     return jsonify({"status": "error", "message": str(e)}), 500
   return jsonify("deleted"), 200
 
 
-@app.route("/stops")
+@admin_bp.route("/stops")
 def stop_manager():
   return render_template("stops.html")
 
-@app.route("/add_stop", methods=["POST"])
+@admin_bp.route("/add_stop", methods=["POST"])
 def add_stop():
   data = request.json
   name = data.get("name")
@@ -106,7 +116,7 @@ def add_stop():
     response = requests.post(
       f"{os.getenv('EXPRESS_URI')}/api/stops",
       json=payload,
-      headers=header,
+      headers=get_admin_token(),
       timeout=5
     )
     response.raise_for_status()
@@ -115,7 +125,7 @@ def add_stop():
 
   return jsonify(response.json()), 201
 
-@app.route("/get_stops", methods=["GET"])
+@admin_bp.route("/get_stops", methods=["GET"])
 def get_stops():
   try:
     response = requests.get(f"{os.getenv('EXPRESS_URI')}/api/stops")
@@ -128,29 +138,31 @@ def get_stops():
     return jsonify({"status": "error", "message": str(e)}), 500
   return jsonify(stops), 200
 
-@app.route("/update_stop/<stop_id>", methods=["POST"])
+@admin_bp.route("/update_stop/<stop_id>", methods=["POST"])
 def update_stop(stop_id):
   data = request.json
   name = data.get("stop_name")
   location = data.get("location")
   if name and location:
     try:
-      response = requests.put(f"{os.getenv('EXPRESS_URI')}/api/stops/{stop_id}",json={"name":name,"location": location},headers=header)
+      response = requests.put(f"{os.getenv('EXPRESS_URI')}/api/stops/{stop_id}",json={"name":name,"location": location},headers=get_admin_token())
       response.raise_for_status()
       data = response.json()
     except requests.exceptions.RequestException as e:
       return jsonify({"status": "error", "message": str(e)}), 500
     return jsonify(data), 200
 
-@app.route("/delete_stop/<stop_id>", methods=["DELETE"])
+@admin_bp.route("/delete_stop/<stop_id>", methods=["DELETE"])
 def delete_stop(stop_id):
   try:
-    response = requests.delete(f"{os.getenv('EXPRESS_URI')}/api/stops/{stop_id}",headers=header)
+    response = requests.delete(f"{os.getenv('EXPRESS_URI')}/api/stops/{stop_id}",headers=get_admin_token())
     response.raise_for_status()
     data = response.json()
   except requests.exceptions.RequestException as e:
     return jsonify({"status": "error", "message": str(e)}), 500
   return jsonify(data), 200
+
+app.register_blueprint(admin_bp)
 
 if __name__ == "__main__":
   debug_mode = os.getenv('FLASK_ENV') == 'development'
